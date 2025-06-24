@@ -95,30 +95,15 @@ class MusicDownloader:
                 ydl.download([search_query])
                 
                 # Find the downloaded file (it will have .mp3 extension after post-processing)
-                safe_title = self._sanitize_filename(video_title)
-                possible_files = [
-                    os.path.join(self.temp_dir, f"{safe_title}.mp3"),
-                    os.path.join(self.temp_dir, f"{video_title}.mp3"),
-                ]
-                
-                # Also check for files that might have been created with different naming
+                # yt_dlp creates files with the exact title, so let's search for all MP3 files
                 temp_files = [f for f in os.listdir(self.temp_dir) if f.endswith('.mp3')]
-                latest_file = None
                 
                 if temp_files:
-                    # Get the most recently created .mp3 file
+                    # Get the most recently created .mp3 file (should be our download)
                     temp_files_with_path = [os.path.join(self.temp_dir, f) for f in temp_files]
-                    latest_file = max(temp_files_with_path, key=os.path.getctime)
-                
-                # Try to find the file
-                downloaded_file = None
-                for file_path in possible_files:
-                    if os.path.exists(file_path):
-                        downloaded_file = file_path
-                        break
-                
-                if not downloaded_file and latest_file:
-                    downloaded_file = latest_file
+                    downloaded_file = max(temp_files_with_path, key=os.path.getctime)
+                else:
+                    downloaded_file = None
                 
                 if not downloaded_file:
                     return {
